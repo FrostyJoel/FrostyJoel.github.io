@@ -46,41 +46,6 @@ After the generation is done, the rooms and corridors can be retrieved via the d
 
 The first step in developing this type of generation was creating an ellipse that rooms spawn in. I have a minimum number of rooms the user wants and can tweak in the UI. These are the blue rooms. I spawn various rooms of random sizes, where the blue rooms are bigger than the grey rooms. The other grey rooms are used as potential connecting corridors once the generation gets to that point.
 
-```cpp
-glm::vec2 Dungeon::RoomCreator::GetRandomPointInEllipse(const float eclipseWidth, const float eclipseHeight)
-{
-    const auto& dungeonGenSystem = Engine.ECS().GetSystem<DungeonStruct>();
-    const float tileSize = dungeonGenSystem.GetTileSize();
-
-    const float t = 2 * pi<float>() * GetRandomNumber(0, 1);
-    const float u = GetRandomNumber(0, 1) + GetRandomNumber(0, 1);
-    float r = 0.0f;
-
-    if (u > 1)
-    {
-        r = 2 - u;
-    }
-    else
-    {
-        r = u;
-    }
-
-    return {RoundTiles(eclipseWidth * r * glm::cos(t)), RoundTiles(eclipseHeight * r * glm::sin(t))};
-}
-```
-
-Rounding to tile position
-
-```cpp
-float Dungeon::RoomCreator::RoundTiles(const float n)
-{
-    const auto& dungeonGenSystem = Engine.ECS().GetSystem<DungeonStruct>();
-    const float tileSize = dungeonGenSystem.GetTileSize();
-
-    return glm::floor(((n + tileSize - 1) / tileSize)) * tileSize;
-}
-```
-
 ### Physics
 
 ![Physics Seperation](/Images/PhysicsSeperationOfRooms.gif)
@@ -89,56 +54,7 @@ While the rooms were being created, I gave them a weight based on their sizes. T
 
 I decided to use a physics system to separate the rooms because it was already implemented in the template and I have more experience using it. But it is still doable with out relling on a physics system. It can be done with a steering system which is what the original creator of this generation used. I decide how much to move the rooms based on their weight.
 
-```cpp
-void Dungeon::DungeonGeneration2D::UpdateRoomLoc()
-{
-    bool stillMoving = false;
-    const auto& roomView = Engine.ECS().Registry.view<physics::Body, Transform, Room>();
-    for (const auto& [entity, body, transform, roomRef] : roomView.each())
-    {
-        for (const auto& [entity1, entity2, normal, depth, contactPoint] : body.GetCollisionData())
-        {
-            const float invMass1 = Engine.ECS().Registry.get<physics::Body>(entity1).GetInvMass();
-            const float invMass2 = Engine.ECS().Registry.get<physics::Body>(entity2).GetInvMass();
-
-            const float totalInvMass = invMass1 + invMass2;
-
-            vec2 nPos = normal * ((depth * totalInvMass));
-            if (glm::length(nPos) > 0.01f)
-            {
-                stillMoving = true;
-            }
-            // move away from the collision
-            body.SetPosition(body.GetPosition() + nPos);
-        }
-    }
-}
-```
-
 After the rooms are moving less than a certain threshold, they stop moving and snap to their closest position on a grid.
-
-```cpp
-void Dungeon::DungeonGeneration2D::UpdateRoomLoc()
-{
-    if (!stillMoving)
-    {
-        auto& dungeonStruct = Engine.ECS().GetSystem<DungeonStruct>();
-
-        glm::vec2 minPoint = {FLT_MAX, FLT_MAX};
-        glm::vec2 maxPoint = {-FLT_MAX, -FLT_MAX};
-
-        for (const auto& [entity, body, transform, roomRef] : roomView.each())
-        {
-            float roundedX = glm::floor(body.GetPosition().x + 0.5f);
-            float roundedY = glm::floor(body.GetPosition().y + 0.5f);
-
-            body.SetPosition(RoomCreator::RoundToGridPos(body.GetPosition()));
-
-            roomRef.UpdateWorldRoomPos(body.GetPosition());
-        }
-    }
-}
-```
 
 ### Corridors
 
@@ -160,63 +76,6 @@ I then use Kruskal's minimum spawn tree algorithm <a href="#links">[5]</a> on to
 ![Readding Edges](/Images/RoomReaddingCorridors.png)
 
 Once the minimum span tree algorithm is done removing all the looping edges, I add a percentage of the edges back from the original triangulation to make the dungeon layout more interesting.
-
-```cpp
-bee::graph::Graph<glm::vec2> CorridorConnections::ReAddingConnections(const bee::graph::Graph<glm::vec2>& fullGraphRef,
-                                                                      const bee::graph::Graph<glm::vec2>& minimumSpanTree,
-                                                                      const float percentageToAdd)
-{
-    bee::graph::Graph<glm::vec2> minimumWithExtraConnections;
-    const int numberOfVertices = static_cast<int>(fullGraphRef.GetNumberOfVertices());
-
-    for (int i = 0; i < numberOfVertices; i++)
-    {
-        minimumWithExtraConnections.AddVertex(fullGraphRef.GetVertex(i));
-    }
-
-    std::vector<TempEdge> allEdges;
-    std::vector<TempEdge> allMinimumSpanTreeEdges;
-
-    for (int i = 0; i < numberOfVertices; i++)
-    {
-        for (const auto j : fullGraphRef.GetEdgesFromVertex(i))
-        {
-            allEdges.push_back({j.m_cost, i, j.m_targetVertex});
-        }
-
-
-        for (const auto j : minimumSpanTree.GetEdgesFromVertex(i))
-        {
-            allMinimumSpanTreeEdges.push_back({j.m_cost, i, j.m_targetVertex});
-        }
-    }
-
-    std::vector<TempEdge> addedEdges = allMinimumSpanTreeEdges;
-
-    const auto total = static_cast<float>(allEdges.size());
-    const float minimumPercentage = (static_cast<float>(allMinimumSpanTreeEdges.size()) / total) * 100.0f;
-
-    float currentPercentage = minimumPercentage;
-
-    while (currentPercentage <= minimumPercentage + percentageToAdd)
-    {
-        const int randomIndex = Dungeon::RandomInt(0, static_cast<int>(allEdges.size() - 1));
-
-        if (std::find(addedEdges.begin(), addedEdges.end(), allEdges[randomIndex]) == addedEdges.end())
-        {
-            addedEdges.push_back(allEdges[randomIndex]);
-            currentPercentage = (static_cast<float>(addedEdges.size()) / total) * 100.0f;
-        }
-    }
-
-    for (const auto& [weight, from, to] : addedEdges)
-    {
-        minimumWithExtraConnections.AddEdge(from, to, weight, false);
-    }
-
-    return minimumWithExtraConnections;
-}
-```
 
 #### Corridors
 ![Corridor Connections](/Images/CorridorsConnecting.png)
