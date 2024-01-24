@@ -8,7 +8,7 @@
 ### The process of dungeon generation
 
 
-In year 2, block B of my education at Breda University of Applied Sciences. I wanted to create a dungeon generation, and I followed a very good blog post regarding the process of creating this type of dungeon <a href="#links">^[1]^</a> there are a couple of libraries used in the process. I used a template that was provided by Breda University of Applied Sciences that included an ECS system, which was a big part of this project. I also used CMT for the delauney triangulation.
+In year 2, block B of my education at Breda University of Applied Sciences. I wanted to create a dungeon generation, and I followed a very good blog post regarding the process of creating this type of dungeon <a href="#links">[1]</a> there are a couple of libraries used in the process. I used a template that was provided by Breda University of Applied Sciences that included an ECS system, which was a big part of this project. I also used CMT for the delauney triangulation.
 
 
 ### The first step
@@ -59,9 +59,9 @@ Once all the corridors are done being created, the dungeon generator returns a s
 
 ### Links
 
-[1]: <a href="https://www.gamedeveloper.com/programming/procedural-dungeon-generation-algorithm">Procedural Dungeon Generation Algorithm</a>
+[1] <a href="https://www.gamedeveloper.com/programming/procedural-dungeon-generation-algorithm">Procedural Dungeon Generation Algorithm</a>
 
-<br> </br>
+<br>
 
 ![BuasLogo](/Images/Logo_BUas_Black.png)
 
