@@ -1,1 +1,1 @@
-This blog will mostly be used to write down the processes and progress that I make when developing games.
+This blog will mostly be used to write down the processes and progress that I make when developing games during my education at Breda University of Applied Sciences.
