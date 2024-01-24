@@ -5,9 +5,9 @@
 
 ### The process of dungeon generation
 
-In year 2, block B of my education at Breda University of Applied Sciences. I wanted to create a dungeon generation, and I followed a very good blog post regarding the process of creating this type of dungeon. <ahref="#links">[1]</a>
+In year 2, block B of my education at Breda University of Applied Sciences. I wanted to create a dungeon generation, and I followed a very good blog post regarding the process of creating this type of dungeon. <a href="#links">[1]</a>
 
-There are a couple of libraries used in this project. I used a template that was provided by Breda University of Applied Sciences that included an Entt library <ahref="#links">[2]</a>, which was a big part of this project. I also used CDT triangulation <ahref="#links">[3]</a> for the Delaunay triangulation.<ahref="#links">[4]</a>
+There are a couple of libraries used in this project. I used a template that was provided by Breda University of Applied Sciences that included an Entt library <a href="#links">[2]</a>, which was a big part of this project. I also used CDT triangulation <a href="#links">[3]</a> for the Delaunay triangulation.<a href="#links">[4]</a>
 
 ### Usage of APIs
 
@@ -145,9 +145,9 @@ void Dungeon::DungeonGeneration2D::UpdateRoomLoc()
 #### Triangulation
 ![Triangulation](/Images/RoomTriangulation.png)
 
-Once they are placed on a grid, I start connecting them up using Dalauney triangulation. <ahref="#links">[4]</a>
+Once they are placed on a grid, I start connecting them up using Dalauney triangulation. <a href="#links">[4]</a>
 
-I add the centre of each room to a list of vertices, so it can be triangulated. To triangulate everything, I use the CDT triangulation library. <ahref="#links">[3]</a>
+I add the centre of each room to a list of vertices, so it can be triangulated. To triangulate everything, I use the CDT triangulation library. <a href="#links">[3]</a>
 
 After the triangulation, I transfer the points into a graph.
 
