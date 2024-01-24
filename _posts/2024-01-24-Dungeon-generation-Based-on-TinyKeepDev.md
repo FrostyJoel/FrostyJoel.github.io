@@ -1,5 +1,5 @@
 ## Dungeon Generator
 
-![FinalResult](/_includes/_media/FinalResult.gif)
+![FinalResult](/Images/FinalResult.gif)
 
 ### This is a header
